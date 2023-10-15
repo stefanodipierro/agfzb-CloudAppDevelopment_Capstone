@@ -18,14 +18,18 @@ urlpatterns = [
     path('contact/', views.contact_view, name='contact'),
 
     # path for registration
+    path('registration/', views.registration_request, name='registration'),
 
     # path for login
+    path('login/', views.user_login, name='login'),
+
 
     # path for logout
+    path('logout/', views.user_logout, name='logout'),
 
-    path(route='', view=views.get_dealerships, name='index'),
 
     # path for dealer reviews view
+    path(route='', view=views.get_dealerships, name='index'),
 
     # path for add a review view
 
