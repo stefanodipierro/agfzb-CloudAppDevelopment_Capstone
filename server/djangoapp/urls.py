@@ -10,8 +10,12 @@ urlpatterns = [
     # name the URL
 
     # path for about view
+    path('static/', views.static_page_view, name='static_page'),
+    path('about/', views.about_view, name='about'),
+
 
     # path for contact us view
+    path('contact/', views.contact_view, name='contact'),
 
     # path for registration
 
