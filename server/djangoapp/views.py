@@ -6,13 +6,15 @@ from django.contrib.auth.forms import UserCreationForm
 
 # from .models import related models
 from django.http import JsonResponse
-from .models import Dealership, Review
+from .models import Dealership, Review, CarModel, CarMake
 # from .restapis import related methods
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
 import logging
 import json
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -72,17 +74,47 @@ def registration_request(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     context = {}
-    if request.method == "GET":
-        return render(request, 'djangoapp/index.html', context)
+    dealerships = Dealership.objects.all()
+    context["dealership_list"] = dealerships
+    return render(request, 'djangoapp/index.html', context)
+
+
+
 
 
 # Create a `get_dealer_details` view to render the reviews of a dealer
-# def get_dealer_details(request, dealer_id):
-# ...
+def get_dealer_details(request, dealer_id):
+    
+    context = {
+        # altre variabili
+        'dealer_id': dealer_id
+    }
+        # Aggiungi un campo emoji ai dati della recensione
+    reviews = Review.objects.filter(dealership_id=dealer_id)
+    for review in reviews:
+        review.emoji = get_sentiment_emoji(review.review)
+    context["reviews"] = reviews
+
+    return render(request, 'djangoapp/dealer_details.html', context)
 
 # Create a `add_review` view to submit a review
-# def add_review(request, dealer_id):
-# ...
+def add_review(request, dealer_id):
+    if request.method == "GET":
+        context = {}
+        context["dealer_id"] = dealer_id
+        context["cars"] = CarModel.objects.filter(dealer_id=dealer_id)
+        return render(request, 'djangoapp/add_review.html', context)
+    elif request.method == "POST":
+        review = Review(
+            name=request.user.username,
+            dealership_id=dealer_id,
+            review=request.POST["content"],
+            purchase_date=datetime.strptime(request.POST["purchasedate"], "%Y-%m-%d").strftime("%Y-%m-%d"),
+
+        )
+        review.save()
+        return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
+
 
 def all_dealerships(request):
     dealerships = list(Dealership.objects.values())
@@ -101,3 +133,15 @@ def post_review(request):
     data = request.json
     Review.objects.create(**data)
     return JsonResponse({"status": "success"})
+
+def get_sentiment_emoji(text):
+    analyzer = SentimentIntensityAnalyzer()
+    sentiment = analyzer.polarity_scores(text)
+    
+    # Scegli un emoji in base al punteggio di polarità
+    if sentiment['compound'] >= 0.05:
+        return '😊'  # Emoji positivo
+    elif sentiment['compound'] <= -0.05:
+        return '😢'  # Emoji negativo
+    else:
+        return '😐'  # Emoji neutro

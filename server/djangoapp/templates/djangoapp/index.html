@@ -43,7 +43,7 @@
         <span class="navbar-text">
             Hello, {{ user.first_name }}!
         </span>
-        <a href="djangoapp/logout/" class="btn btn-outline-danger ml-2">Sign Out</a>
+        <a href="logout/" class="btn btn-outline-danger ml-2">Sign Out</a>
         {% else %}
         <!-- Se l'utente NON è autenticato -->
         <form class="form-inline" action="{% url 'djangoapp:login' %}" method="post">
@@ -57,8 +57,78 @@
         </div>
       </nav>
       
-
     <!--Add a dealer table here -->
+    <table class="table" id="table">
+        <thead>
+            <tr>
+                <th data-field="id">ID</th>
+                <th data-field="name">Name</th>
+                <th data-field="address">Address</th>
+                <th data-field="city">City</th>
+                <th data-field="zip">Zip</th>
+                <th data-field="State">State
+                    <input type="text" id="stateInput" placeholder="Enter State">
+<button onclick="filterDealerships()">Filter</button>
+
+<!-- Assumendo che tu abbia una tabella con righe che rappresentano ciascun concessionario -->
+<table>
+    <tbody id="dealershipTable">
+        {% for dealer in dealership_list %}
+        <tr data-state="{{ dealer.state }}">
+            <!-- tuoi campi di concessionario qui -->
+        </tr>
+        {% endfor %}
+    </tbody>
+</table> 
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dealer in dealership_list %}
+            <tr>
+                <td>{{ dealer.id }}</td>
+                <td><a href="{% url 'djangoapp:dealer_details' dealer.id %}">{{ dealer.short_name }}</a></td>
+                <td>{{ dealer.address }}</td>
+                <td>{{ dealer.city }}</td>
+                <td>{{ dealer.zip }}</td>
+                <td>{{ dealer.st }}</td>
+
+            </tr>
+        {% endfor %}
+        
+        </tbody>
+    </table>
+    
+    
+
+    <script>
+        $(function() {
+            $('#table').bootstrapTable()
+        })
+    </script>
+    <script>
+        function filterDealerships() {
+    // Ottieni il valore inserito dall'utente
+    var inputState = document.getElementById('stateInput').value.toLowerCase();
+
+    // Ottieni tutte le righe della tabella dei concessionari
+    var rows = document.getElementById('dealershipTable').querySelectorAll('tr[data-state]');
+
+    // Itera attraverso ciascuna riga e nascondi quelle che non corrispondono allo stato inserito
+    for (var i = 0; i < rows.length; i++) {
+        var state = rows[i].getAttribute('data-state').toLowerCase();
+
+        if (state.includes(inputState) || inputState === '') {
+            rows[i].style.display = '';
+        } else {
+            rows[i].style.display = 'none';
+        }
+    }
+}
+
+    </script>
+      
+    
 
     </body>
 

@@ -12,5 +12,31 @@
 </head>
     <body>
     <!--Add review form here -->
+    <div class="container mt-5">
+        <h2>Add Review</h2>
+        <form method="post" action="{% url 'djangoapp:add_review' dealer_id %}">
+            {% csrf_token %}
+        
+            <label for="content">Contenuto della recensione:</label><br>
+            <textarea id="content" name="content" rows="4" cols="50"></textarea><br><br>
+        
+
+        
+            <label for="purchasedate">Data di acquisto:</label>
+            <input type="date" id="purchasedate" name="purchasedate"><br><br>
+        
+
+            <label for="car_year">Anno dell'auto:</label>
+            <input type="number" id="car_year" name="car_year" min="1900" max="2099" step="1" value="2023"><br><br>
+        
+            <input type="submit" value="Invia Recensione">
+        </form>
+    </div>
+    <script>
+        $('#id_purchase_date').datepicker({
+            format: 'mm-dd-yyyy'
+        });
+    </script>
+
     </body>
 </html>

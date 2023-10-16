@@ -28,6 +28,9 @@ from django.utils.timezone import now
 
 
 class Dealership(models.Model):
+    full_name = models.CharField(max_length=255, default="Unknown Dealer")
+    short_name = models.CharField(max_length=50, default="Unknown Dealer")
+
     city = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     st = models.CharField(max_length=2)
@@ -37,14 +40,15 @@ class Dealership(models.Model):
     long = models.FloatField()
 
 class Review(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, default="Anonymous")  # Default to "Anonymous" if name not provided
     dealership = models.ForeignKey(Dealership, on_delete=models.CASCADE)
-    review = models.TextField()
-    purchase = models.BooleanField()
+    review = models.TextField(blank=True, default='')  # Allow blank reviews and default to an empty string if not provided
+    purchase = models.BooleanField(default=False)  # Default to False if not provided
     purchase_date = models.DateField(null=True, blank=True)
-    car_make = models.CharField(max_length=100)
-    car_model = models.CharField(max_length=100)
-    car_year = models.IntegerField()
+    car_make = models.CharField(max_length=100, null=True, blank=True)  # Made nullable and allow blank values
+    car_model = models.CharField(max_length=100, null=True, blank=True)  # Made nullable and allow blank values
+    car_year = models.IntegerField(null=True, blank=True)  # Made nullable and allow blank values
+
 
 class CarMake(models.Model):
     name = models.CharField(max_length=255)
