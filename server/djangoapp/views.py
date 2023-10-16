@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.forms import UserCreationForm
 
 # from .models import related models
+from django.http import JsonResponse
+from .models import Dealership, Review
 # from .restapis import related methods
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
@@ -82,3 +84,20 @@ def get_dealerships(request):
 # def add_review(request, dealer_id):
 # ...
 
+def all_dealerships(request):
+    dealerships = list(Dealership.objects.values())
+    return JsonResponse(dealerships, safe=False)
+
+def dealerships_by_state(request, state):
+    dealerships = list(Dealership.objects.filter(st=state.upper()).values())
+    return JsonResponse(dealerships, safe=False)
+
+def reviews_for_dealership(request, dealer_id):
+    reviews = list(Review.objects.filter(dealership_id=dealer_id).values())
+    return JsonResponse(reviews, safe=False)
+
+def post_review(request):
+    # Assuming JSON payload in POST request
+    data = request.json
+    Review.objects.create(**data)
+    return JsonResponse({"status": "success"})

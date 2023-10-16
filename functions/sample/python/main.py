@@ -1,12 +1,4 @@
-"""IBM Cloud Function that gets all reviews for a dealership
-
-Returns:
-    List: List of reviews for the given dealership
-"""
-from cloudant.client import Cloudant
-from cloudant.error import CloudantException
-import requests
-
+import sqlite3
 
 def main(param_dict):
     """Main Function
@@ -15,21 +7,31 @@ def main(param_dict):
         param_dict (Dict): input paramater
 
     Returns:
-        _type_: _description_ TODO
+        List: List of reviews for the given dealership
     """
+    
+    # Assuming you pass the path to the SQLite database in the parameters
+    db_path = param_dict.get("DB_PATH")
+
+    if not db_path:
+        return {"error": "DB_PATH is not provided"}
 
     try:
-        client = Cloudant.iam(
-            account_name=param_dict["COUCH_USERNAME"],
-            api_key=param_dict["IAM_API_KEY"],
-            connect=True,
-        )
-        print(f"Databases: {client.all_dbs()}")
-    except CloudantException as cloudant_exception:
-        print("unable to connect")
-        return {"error": cloudant_exception}
-    except (requests.exceptions.RequestException, ConnectionResetError) as err:
-        print("connection error")
-        return {"error": err}
+        # Connect to the SQLite database
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
 
-    return {"dbs": client.all_dbs()}
+        # Execute a query to fetch all reviews
+        cursor.execute("SELECT * FROM reviews")
+        reviews = cursor.fetchall()
+
+        # Close the connection
+        conn.close()
+    except sqlite3.Error as e:
+        print("SQLite error:", e)
+        return {"error": str(e)}
+
+    # Convert the raw reviews data (list of tuples) into a more friendly format
+    reviews_list = [{"id": r[0], "review": r[1]} for r in reviews]  # Adjust this based on your table structure
+
+    return {"reviews": reviews_list}
